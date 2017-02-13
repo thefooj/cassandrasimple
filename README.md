@@ -41,5 +41,13 @@ stuff2 <- cass_query(jCassSess,"select * from test_table where dt = '2017-01-20'
 #1 2017-01-20    13     80 24.33 -34.33
 
 close_cass_session(jCassSess)
+```
+
+To install this, do:
+
+```
+library(devtools)
+install_github("thefooj/cassandrasimple")
+```
 
 
