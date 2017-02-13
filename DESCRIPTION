@@ -1,0 +1,13 @@
+Package: cassandrasimple
+Type: Package
+Title: Cassandra Simple Connector
+Version: 0.1.0
+Author: Brian Fujito <bfujito@gmail.com>
+Maintainer: Brian Fujito <bfujito@gmail.com>
+Description: Wraps Datastax java-driver to allow us to read and write Cassandra data
+License: GPL-2
+LazyData: TRUE
+SystemRequirements: Java JDK 1.8 or higher
+Imports:
+  dplyr (>= 0.5.0),
+  rJava (>= 0.9-8)
