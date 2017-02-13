@@ -61,8 +61,8 @@
 #' @param cqlQuery A string query.  If performing multiple at once, use BEG
 #'
 #' @examples
-#'   run_cass_update(jCassSess, "insert into test_lmp_combined (dt,hr,official_pnode_id,rt_energy,da_energy) values ('2017-01-19',13,80,24.33,-34.33)")
-#'   run_cass_update(jCassSess, "BEGIN BATCH
+#'   cass_update(jCassSess, "insert into test_lmp_combined (dt,hr,official_pnode_id,rt_energy,da_energy) values ('2017-01-19',13,80,24.33,-34.33)")
+#'   cass_update(jCassSess, "BEGIN BATCH
 #'       insert into test_lmp_combined (dt,hr,official_pnode_id,rt_energy,da_energy) values ('2017-01-20',13,80,24.33,-34.33);
 #'       insert into test_lmp_combined (dt,hr,official_pnode_id,rt_energy,da_energy) values ('2017-01-20',24,80,14.44,55.55);
 #'       APPLY BATCH")

@@ -9,5 +9,6 @@ License: GPL-2
 LazyData: TRUE
 SystemRequirements: Java JDK 1.8 or higher
 Imports:
-  dplyr (>= 0.5.0),
+  dplyr,
   rJava (>= 0.9-8)
+Suggests: testthat
