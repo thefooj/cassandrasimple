@@ -56,3 +56,38 @@ test_that("updates and queries work, converting NULL to NA and handling mappings
 
   close_cass_session(jCassSess)
 })
+
+test_that("timestamp types are retrieved as UTC with appropriate conversions", {
+  jCassSess <- get_cass_session('localhost', 'Test Cluster', 'cassandrasimple_test')
+
+  cass_update(jCassSess, "drop table if exists test_timestamp_table")
+
+  cass_update(jCassSess, "create table if not exists test_timestamp_table (
+              dt date,
+              hr tinyint,
+              obj_id int,
+              update_version_time timestamp,
+              float_1 float,
+              float_2 float,
+              double_1 double,
+              str_val text,
+              primary key ((dt),hr,obj_id, update_version_time)
+  )")
+
+  # inserts based on discernable strings for timezone offsets
+  cass_update(jCassSess, "BEGIN BATCH
+              insert into test_timestamp_table (dt,hr,obj_id,update_version_time,float_1,float_2,double_1,str_val) values ('2017-01-20',13,80,'2017-01-19 07:05:02+0000',NULL,-34.33,NULL,NULL);
+              insert into test_timestamp_table (dt,hr,obj_id,update_version_time,float_1,float_2,double_1,str_val) values ('2017-01-20',24,80,'2017-01-19 02:04:02-0500',14.44,55.55,8.2492994,'ANOTHER');
+              APPLY BATCH")
+
+  res <- cass_query(jCassSess, "SELECT * FROM test_timestamp_table")
+  expect_is(res, "data.frame")
+  expect_equal(nrow(res),2)
+  expect_is(res$update_version_time, 'POSIXct')
+  # converted over to UTC
+  expect_equal(strftime(res$update_version_time, '%Y-%m-%d %H:%M:%S %Z', tz="UTC"),
+               c('2017-01-19 07:05:02 UTC','2017-01-19 07:04:02 UTC'))
+
+
+  close_cass_session(jCassSess)
+})

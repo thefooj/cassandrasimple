@@ -50,4 +50,13 @@ library(devtools)
 install_github("thefooj/cassandrasimple")
 ```
 
+We currently support these types:
 
+* float => as.numeric
+* double => as.numeric
+* text => as.character
+* varchar => as.character
+* int => as.integer
+* tinyint => as.integer
+* date => as.Date.  Custom converter using CQL LocalDate to YYYY-mm-dd string to asDate(x, tz='UTC')
+* timestamp => as.POSIXct.  Custom converter using CQL Timestamp (milliseconds since epoch 1970-01-01) to long milliseconds -> seconds to asPOSIXct(x, tz='UTC', origin='1970-01-01')

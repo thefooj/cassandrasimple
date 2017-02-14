@@ -1,7 +1,7 @@
 
 #' for a given Java com.datastax.driver.core.ResultSet object, get the column definitions as a List.
 #' Raises errors if we do not yet support the column type.
-#' Currently we support: float, double, text, varchar, int, tinyint, date
+#' Currently we support: float, double, text, varchar, int, tinyint, date (assumes UTC context), timestamp (stored as POSIXct in timezone UTC)
 #'
 #' @param jcRes instance of com.datastax.driver.core.ResultSet
 .cass_col_map <- function(jcRes) {
@@ -45,6 +45,10 @@
       map$java_get_func = 'getDate'
       map$r_cast_func   = 'as_date_from_cql_date'  # our custom function
       map$jni_type      = 'Lcom/datastax/driver/core/LocalDate;'
+    } else if (ctype=='timestamp') {
+      map$java_get_func = 'getTimestamp'
+      map$r_cast_func   = 'as_posixct_from_cql_get_timestamp'
+      map$jni_type      = 'Ljava/util/Date;'
     } else {
       stop(paste0("Unsupported type of column ",cname," type ",ctype," in query "))
     }
