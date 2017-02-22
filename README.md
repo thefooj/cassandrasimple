@@ -60,3 +60,58 @@ We currently support these types:
 * tinyint => as.integer
 * date => as.Date.  Custom converter using CQL LocalDate to YYYY-mm-dd string to asDate(x, tz='UTC')
 * timestamp => as.POSIXct.  Custom converter using CQL Timestamp (milliseconds since epoch 1970-01-01) to long milliseconds -> seconds to asPOSIXct(x, tz='UTC', origin='1970-01-01')
+
+
+== Writing Dataframes ==
+
+As of version 1.0.1, we now support the batch-writing of data.frames to Cassandra.
+
+```
+
+# If you have a Cassandra table "test_table" with schema that looks like this:
+
+cass_update(jCassSess, "create table if not exists test_insert_table (
+              dt date,
+              hr tinyint,
+              obj_id int,
+              int_1 int,
+              int_2 int,
+              float_1 float,
+              float_2 float,
+              double_1 double,
+              str_val text,
+              factor_str_val text,
+              ts_val timestamp,
+              dt_val date,
+              primary key ((dt),hr,obj_id)
+  )")
+  
+# And you have a data.frame:
+myDf1 <- data.frame(dt=as.Date('2017-02-22'), hr=seq(1,24), obj_id=round(runif(24,min=1,max=1000),0),
+                      int_1=as.integer(runif(24,min=1,max=24)),
+                      int_2=as.numeric(seq(1,24)),
+                      float_1=runif(24,min=-10,max=10),
+                      float_2=runif(24,min=-1000,max=1000),
+                      double_1=runif(24,min=-1000,max=1000),
+                      str_val=paste("Hi! It's hour",seq(1,24)),
+                      factor_str_val=as.factor(paste("fac_",round(runif(24,min=1,max=100),0),sep='')),
+                      ts_val=as.POSIXct('2017-02-22 00:23:33',tz='EST'),
+                      dt_val=as.Date('2017-03-01'),
+                      stringsAsFactors = F
+                      )
+
+# ... and that data.frame has NAs                      
+myDf1[3,]$float_1 <- NA
+myDf1[3,]$str_val <- NA
+myDf1[3,]$factor_str_val <- NA
+myDf1[4,]$double_1 <- NA
+myDf1[4,]$dt_val <- NA
+myDf1[5,]$int_1 <- NA
+myDf1[5,]$ts_val <- NA
+
+# you can save it like this:
+cass_save_df(jCassSess, myDf1, "test_insert_table", row_batches=2)
+
+```
+
+See `cass_save_df` for details.
