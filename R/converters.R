@@ -9,3 +9,12 @@ as_posixct_from_cql_get_timestamp <- function(javaDate) {
   as.POSIXct(rJava::.jcall(javaDate,'J', 'getTime')/1000, origin="1970-01-01", tz="UTC")
 }
 
+
+
+as_date_from_1970_epoch_days <- function(data) {
+  as.Date(data, origin="1970-01-01", tz="UTC")
+}
+
+as_posixct_from_1970_epoch_seconds <- function(data) {
+  as.POSIXct(data, origin="1970-01-01", tz="UTC")
+}

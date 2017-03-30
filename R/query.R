@@ -76,15 +76,36 @@ cass_update <- function(jCassSess, cqlQuery) {
   return(T)
 }
 
-cass_query_faster <- function(jCassSess, cqlQuery, estimatedNumRows=1000) {
-  reader <- rJava::.jnew("com/tioscapital/cassandrasimple/CassandraReader",jCassSess, cqlQuery, as.integer(estimatedNumRows));
+cass_query <- function(jCassSess, cqlQuery, estimatedNumRows=1000, debug=F) {
+  reader <- rJava::.jnew("com/tioscapital/cassandrasimple/CassandraReader",jCassSess, cqlQuery, as.integer(estimatedNumRows), debug);
   numCols <- rJava::.jcall(reader, 'I', 'getNumColumns')
+
+  dfList <- list()
+
+  if (debug) { cat("... in new cass_query I have ",numCols," columns\n") }
   for (i in seq.int(numCols)) {
-    col <- rJava::.jcall(reader, 'Lcom/tioscapital/cassandrasimple/CassandraReader$CassColumn;', 'getColumn', as.integer(i-1))
+    col <- rJava::.jcall(reader, 'Lcom/tioscapital/cassandrasimple/CassandraColumn;', 'getColumn', as.integer(i-1))
     colName <- rJava::.jcall(col, 'S', 'getColName')
-    cat("in cass_query_faster... got column ",colName,"\n")
+    colGetter <- rJava::.jcall(col, 'S', 'getGetMethodName')
+    colGetterJniType <- rJava::.jcall(col, 'S', 'getGetMethodJniType')
+    colGetterRConversion <- rJava::.jcall(col, 'S', 'getRConversionName')
+
+    colData <- rJava::.jcall(col, colGetterJniType, colGetter)
+    nullIndexes <- rJava::.jcall(col, "[I", "getNullIndexes")
+
+    if (nchar(colGetterRConversion) > 0) {
+      colData <- get(colGetterRConversion)(colData)
+    }
+
+    if (length(nullIndexes) > 0) {
+      nullIndexes <- nullIndexes + 1  # indexes in java are 0-based
+      if (debug) { cat("for ", colName, " the null indexes are ", paste0(nullIndexes,collapse=","), "\n") }
+      colData[nullIndexes] <- NA
+    }
+    dfList[[colName]] <- colData
   }
-  return(T)
+  df <- as.data.frame(dfList, stringsAsFactors=F)
+  return(df)
 }
 
 #' Execute a CQL query and capture the results as a data.frame.  Columns will match up with what is in the Cassandra table definition and your query.
@@ -98,7 +119,7 @@ cass_query_faster <- function(jCassSess, cqlQuery, estimatedNumRows=1000) {
 #' @param jCassSess The Cassandra session, from get_cass_session
 #' @param cqlQuery A string query.
 #' @export
-cass_query <- function(jCassSess, cqlQuery) {
+cass_query_slower <- function(jCassSess, cqlQuery) {
   jcRes <- rJava::.jcall(jCassSess, 'Lcom/datastax/driver/core/ResultSet;', 'execute', cqlQuery)
 
   results = list()
