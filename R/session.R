@@ -14,17 +14,19 @@ get_cass_session <- function(connectUrl, clusterName, clusterKeyspace,debug=F) {
   rJava::.jinit()
   rJava::.jaddClassPath(Sys.glob(paste0(jarBase,"/*.jar")))
 
-  if (debug==T) { cat("get_cass_session:: ... initializing cluster\n")}
-  jClusterBuilder = rJava::.jcall('com.datastax.driver.core.Cluster', "Lcom/datastax/driver/core/Cluster$Builder;", 'builder')
-  if (debug==T) { cat("get_cass_session:: ... setting cluster name\n")}
-  jClusterBuilder = rJava::.jcall(jClusterBuilder,  "Lcom/datastax/driver/core/Cluster$Builder;", 'withClusterName', clusterName)
-  if (debug==T) { cat("get_cass_session:: ... adding contact point\n")}
-  jClusterBuilder = rJava::.jcall(jClusterBuilder,  "Lcom/datastax/driver/core/Cluster$Builder;", 'addContactPoint', connectUrl)
-  if (debug==T) { cat("get_cass_session:: ... building cluster\n")}
-  jCluster = rJava::.jcall(jClusterBuilder,  "Lcom/datastax/driver/core/Cluster;", 'build')
-  if (debug==T) { cat("get_cass_session:: ... getting session\n")}
-  jCassSess = rJava::.jcall(jCluster, 'Lcom/datastax/driver/core/Session;', 'connect', clusterKeyspace)
-  if (debug==T) { cat("get_cass_session:: ... DONE\n")}
+  jCassSess = rJava::.jcall('com.tioscapital.cassandrasimple.CassandraConnector', "Lcom/datastax/driver/core/Session;", 'getConnection', connectUrl, clusterName, clusterKeyspace, debug)
+
+  # if (debug==T) { cat("get_cass_session:: ... initializing cluster\n")}
+  # jClusterBuilder = rJava::.jcall('com.datastax.driver.core.Cluster', "Lcom/datastax/driver/core/Cluster$Builder;", 'builder')
+  # if (debug==T) { cat("get_cass_session:: ... setting cluster name\n")}
+  # jClusterBuilder = rJava::.jcall(jClusterBuilder,  "Lcom/datastax/driver/core/Cluster$Builder;", 'withClusterName', clusterName)
+  # if (debug==T) { cat("get_cass_session:: ... adding contact point\n")}
+  # jClusterBuilder = rJava::.jcall(jClusterBuilder,  "Lcom/datastax/driver/core/Cluster$Builder;", 'addContactPoint', connectUrl)
+  # if (debug==T) { cat("get_cass_session:: ... building cluster\n")}
+  # jCluster = rJava::.jcall(jClusterBuilder,  "Lcom/datastax/driver/core/Cluster;", 'build')
+  # if (debug==T) { cat("get_cass_session:: ... getting session\n")}
+  # jCassSess = rJava::.jcall(jCluster, 'Lcom/datastax/driver/core/Session;', 'connect', clusterKeyspace)
+  # if (debug==T) { cat("get_cass_session:: ... DONE\n")}
   return(jCassSess)
 }
 

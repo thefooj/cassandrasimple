@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+java-classes
+inst/java/cassandrasimple.jar

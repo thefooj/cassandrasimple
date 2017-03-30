@@ -76,6 +76,17 @@ cass_update <- function(jCassSess, cqlQuery) {
   return(T)
 }
 
+cass_query_faster <- function(jCassSess, cqlQuery, estimatedNumRows=1000) {
+  reader <- rJava::.jnew("com/tioscapital/cassandrasimple/CassandraReader",jCassSess, cqlQuery, as.integer(estimatedNumRows));
+  numCols <- rJava::.jcall(reader, 'I', 'getNumColumns')
+  for (i in seq.int(numCols)) {
+    col <- rJava::.jcall(reader, 'Lcom/tioscapital/cassandrasimple/CassandraReader$CassColumn;', 'getColumn', as.integer(i-1))
+    colName <- rJava::.jcall(col, 'S', 'getColName')
+    cat("in cass_query_faster... got column ",colName,"\n")
+  }
+  return(T)
+}
+
 #' Execute a CQL query and capture the results as a data.frame.  Columns will match up with what is in the Cassandra table definition and your query.
 #' Follow CQL rules for queries.  If you try to query on a column without a secondary index, you will get errors from the Datastax driver.
 #' NULL values in the Cassandra tables are returned as NA in the data frame.  We convert Cassandra data types to reasonable R equivalents.
