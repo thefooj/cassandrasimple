@@ -26,18 +26,14 @@ cass_update(jCassSess, "BEGIN BATCH
     APPLY BATCH")
     
 stuff1 <- cass_query(jCassSess,"select * from test_table where dt = '2017-01-20' and hr = 13")    
-# Source: local data frame [2 x 5]
 # 
 #           dt    hr obj_id val_1  val_2
-#       (date) (int)  (int) (dbl)  (dbl)
 # 1 2017-01-20    13     80 24.33 -34.33
 # 2 2017-01-20    24     80 14.44  55.55
 
 stuff2 <- cass_query(jCassSess,"select * from test_table where dt = '2017-01-20' and hr = 13")  
-# Source: local data frame [1 x 5]
 # 
 #          dt    hr obj_id val_1  val_2
-#      (date) (int)  (int) (dbl)  (dbl)
 #1 2017-01-20    13     80 24.33 -34.33
 
 close_cass_session(jCassSess)
@@ -58,7 +54,7 @@ We currently support these types:
 * varchar => as.character
 * int => as.integer
 * tinyint => as.integer
-* date => as.Date.  Custom converter using CQL LocalDate to YYYY-mm-dd string to asDate(x, tz='UTC')
+* date => as.Date.  Custom converter using CQL LocalDate to int days since 1970-01-01 and to asDate(x, origin='1970-01-01', tz='UTC')
 * timestamp => as.POSIXct.  Custom converter using CQL Timestamp (milliseconds since epoch 1970-01-01) to long milliseconds -> seconds to asPOSIXct(x, tz='UTC', origin='1970-01-01')
 
 
