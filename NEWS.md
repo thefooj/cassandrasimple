@@ -1,4 +1,4 @@
-== Changes in Version 0.2.0 date 2017-03-30 ==
+## Changes in Version 0.2.0 date 2017-03-30
 
 Significant speed improvements.  Moved data fetching code out of rJava/JNI to pure Java.
 In Java, we build up columnar data, and then quickly build up the data.frame from the list of columns.
@@ -29,14 +29,14 @@ A query with 177989 rows:
 
 
 
-== Changes in Version 0.1.2 date 2017-02-14 ==
+## Changes in Version 0.1.2 date 2017-02-14
 
 Close down cluster connection in addition to session connection
 
-== Changes in Version 0.1.1 date 2017-02-22 ==
+## Changes in Version 0.1.1 date 2017-02-22
 
 We added the capability to save a data.frame to Cassandra. via `cass_save_df`
 
-== Initial Releave Version 0.1.0 ==
+## Initial Releave Version 0.1.0
 
 This was our initial release
