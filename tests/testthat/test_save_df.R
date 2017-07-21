@@ -115,6 +115,55 @@ test_that("cass_save_df: updates work with proper type conversions and NA handli
 })
 
 
+test_that("cass_save_df: with option sleep_between_batches will cause sleeps between batches", {
+  jCassSess <- get_cass_session('localhost', 'Tios001', 'cassandrasimple_test')
+
+  cass_update(jCassSess, "drop table if exists test_insert_table")
+
+  cass_update(jCassSess, "create table if not exists test_insert_table (
+              dt date,
+              hr tinyint,
+              obj_id int,
+              int_1 int,
+              int_2 int,
+              float_1 float,
+              float_2 float,
+              double_1 double,
+              str_val text,
+              factor_str_val text,
+              ts_val timestamp,
+              dt_val date,
+              primary key ((dt),hr,obj_id)
+  )")
+
+  set.seed(13247)
+
+  # test simplest save
+  myDf1 <- data.frame(dt=as.Date('2017-02-22'), hr=seq(1,24), obj_id=round(runif(24,min=1,max=1000),0),
+                      int_1=as.integer(runif(24,min=1,max=24)),
+                      int_2=as.numeric(seq(1,24)),
+                      float_1=runif(24,min=-10,max=10),
+                      float_2=runif(24,min=-1000,max=1000),
+                      double_1=runif(24,min=-1000,max=1000),
+                      str_val=paste("Hi! It's hour",seq(1,24)),
+                      factor_str_val=as.factor(paste("fac_",round(runif(24,min=1,max=100),0),sep='')),
+                      ts_val=as.POSIXct('2017-02-22 00:23:33',tz='EST'),
+                      dt_val=as.Date('2017-03-01'),
+                      stringsAsFactors = F
+  )
+
+  output_message <- capture.output(cass_save_df(jCassSess, myDf1, "test_insert_table", row_batches=2, sleep_between_batches=2, show_debug=T))
+  expect_match(paste0(output_message,collapse="\n"), "Total sleep: +24 ")
+
+  res_df <- cass_query(jCassSess, "select * from test_insert_table")
+  res_df <- arrange(res_df, hr)
+  expect_equal(nrow(res_df),24)
+
+  cass_update(jCassSess, "drop table if exists test_insert_table")
+
+  close_cass_session(jCassSess)
+})
+
 test_that("cass_save_df: defensive code cases are handled for bad inputs", {
 
 

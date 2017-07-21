@@ -1,7 +1,7 @@
 Package: cassandrasimple
 Type: Package
 Title: Cassandra Simple Connector
-Version: 0.2.0
+Version: 0.2.1
 Author: Brian Fujito <bfujito@gmail.com>
 Maintainer: Brian Fujito <bfujito@gmail.com>
 Description: Wraps Datastax java-driver to allow us to read and write Cassandra data

@@ -1,3 +1,9 @@
+
+## Changes in Version 0.2.1 date 2017-07-21
+
+Added sleep time option to cass_save_df to sleep between batches
+
+
 ## Changes in Version 0.2.0 date 2017-03-30
 
 Significant speed improvements.  Moved data fetching code out of rJava/JNI to pure Java.

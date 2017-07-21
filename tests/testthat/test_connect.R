@@ -15,10 +15,10 @@ library(dplyr)
 test_that("connections work", {
   jCassSess = tryCatch({
 
-    get_cass_session('localhost', 'Test Cluster', 'cassandrasimple_test')
+    get_cass_session('localhost', 'Tios001', 'cassandrasimple_test')
 
   }, error = function(e) {
-    cat("ERROR with Cassandra connection.  Be sure to have a local Cassandra running with cluster 'Test Cluster' and keyspace 'cassandrasimple_test'\n")
+    cat("ERROR with Cassandra connection.  Be sure to have a local Cassandra running with cluster 'Tios001' and keyspace 'cassandrasimple_test'\n")
     cat("Suppose you have Cassandra downloaded in ~/dev/cassandra/apache-cassandra-3.10/bin\n")
     cat("Then run cassandra with:\n")
     cat("   cd ~/dev/cassandra/apache-cassandra-3.10/bin && ./cassandra\n")

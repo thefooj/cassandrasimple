@@ -111,3 +111,12 @@ cass_save_df(jCassSess, myDf1, "test_insert_table", row_batches=2)
 ```
 
 See `cass_save_df` for details.
+
+
+== Running tests ==
+
+First, you need to run `mkdist` from the command line.  This will create the Java classes needed.
+
+Then in Rstudio you can Build & Reload and run tests
+
+

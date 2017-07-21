@@ -62,7 +62,8 @@
 #' @param df Data.frame.  Columns must match columns in the Cassandra table.  Otherwise the save will fail
 #' @param table_name Name of the Cassandra table.  Save will fail if table does not exist
 #' @param row_batches Number of inserts to run in each batch.  Batches are wrapped in BEGIN BATCH ... APPLY BATCH.  This implies logging.
-cass_save_df <- function(jCassSess, df, table_name, row_batches = 1000) {
+#' @param sleep_between_batches Number of seconds to sleep between batches.  Defaults to 0.
+cass_save_df <- function(jCassSess, df, table_name, row_batches = 1000, sleep_between_batches = 0, show_debug=F) {
 
   # do not use this function when you are working with a df that contains over 100,000 rows
 
@@ -98,6 +99,7 @@ cass_save_df <- function(jCassSess, df, table_name, row_batches = 1000) {
 
   tot_prep_time <- 0
   tot_upload_time <- 0
+  tot_sleep_time <- 0
 
   for (i in 1:num_uploads) {
     prep_start_time <- Sys.time()
@@ -118,17 +120,32 @@ cass_save_df <- function(jCassSess, df, table_name, row_batches = 1000) {
 
     upload_stop_time <- Sys.time()
 
-    cat("[SaveDfToCassandra:",table_name," batch=",i," @", Sys.time(), " - prep: ", (prep_stop_time - prep_start_time), "   upload: ", (upload_stop_time - prep_stop_time),"\n")
+    if (show_debug) {
+      cat("[SaveDfToCassandra:",table_name," batch=",i," @", Sys.time(), " - prep: ", (prep_stop_time - prep_start_time), "   upload: ", (upload_stop_time - prep_stop_time),"\n")
+    }
 
     tot_prep_time <- tot_prep_time + (prep_stop_time - prep_start_time)
     tot_upload_time <- tot_upload_time + (upload_stop_time - prep_stop_time)
+
+    if (sleep_between_batches > 0) {
+      if (show_debug) {
+        cat("[SaveDfToCassandra:",table_name," sleep ", sleep_between_batches,"\n")
+      }
+      Sys.sleep(sleep_between_batches)
+    }
+
+    tot_sleep_time <- tot_sleep_time + sleep_between_batches
   }
 
   options(digits.secs=NULL)
 
-  cat("Total prep: ",tot_prep_time,"\n")
-  cat("Total upload: ", tot_upload_time,"\n")
+  if (show_debug) {
+    cat("Total prep: ",tot_prep_time,"\n")
+    cat("Total upload: ", tot_upload_time,"\n")
+    cat("Total sleep: ", tot_sleep_time,"\n")
 
-  cat('We have uploaded', i, 'batches to Cassandra.\n')
+    cat('We have uploaded', i, 'batches to Cassandra.\n')
+  }
 
+  return(T)
 }
