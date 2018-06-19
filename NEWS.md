@@ -1,4 +1,8 @@
 
+## Change in Version 0.2.2 date 2018-06-19
+
+Added support for boolean/logical type
+
 ## Changes in Version 0.2.1 date 2017-07-21
 
 Added sleep time option to cass_save_df to sleep between batches
