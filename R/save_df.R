@@ -23,7 +23,7 @@
     } else if (colClass=='integer') {
       dfCopy[,x] <- as.character(df[,x])
     } else if (colClass=='logical') {  # boolean T/F/NA
-      dfCopy[,x] <- sapply(df[,x], function(x) { ifelse(is.na(x), NA,  ifelse(x,'1','0') ) })
+      dfCopy[,x] <- sapply(df[,x], function(x) { ifelse(is.na(x), NA,  ifelse(x,'true','false') ) })
     } else {
       stop("unknown df class for ", x, " (",colClass,")")
     }
