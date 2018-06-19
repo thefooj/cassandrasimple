@@ -19,6 +19,7 @@ test_that("cass_save_df: updates work with proper type conversions and NA handli
               factor_str_val text,
               ts_val timestamp,
               dt_val date,
+              bool_val boolean,
               primary key ((dt),hr,obj_id)
   )")
 
@@ -35,6 +36,7 @@ test_that("cass_save_df: updates work with proper type conversions and NA handli
                       factor_str_val=as.factor(paste("fac_",round(runif(24,min=1,max=100),0),sep='')),
                       ts_val=as.POSIXct('2017-02-22 00:23:33',tz='EST'),
                       dt_val=as.Date('2017-03-01'),
+                      bool_val=c(rep(T, 12),rep(F, 12)),
                       stringsAsFactors = F
                       )
   myDf1[3,]$float_1 <- NA
@@ -44,6 +46,7 @@ test_that("cass_save_df: updates work with proper type conversions and NA handli
   myDf1[4,]$dt_val <- NA
   myDf1[5,]$int_1 <- NA
   myDf1[5,]$ts_val <- NA
+  myDf1[5,]$bool_val <- NA
 
   cass_save_df(jCassSess, myDf1, "test_insert_table", row_batches=2)
 
@@ -58,6 +61,8 @@ test_that("cass_save_df: updates work with proper type conversions and NA handli
   expect_true(is.na(filter(res_df, dt=='2017-02-22', hr==4)$double_1))
   expect_true(is.na(filter(res_df, dt=='2017-02-22', hr==5)$int_1))
   expect_true(is.na(filter(res_df, dt=='2017-02-22', hr==5)$ts_val))
+  expect_true(is.na(filter(res_df, dt=='2017-02-22', hr==5)$bool_val))
+
 
   # test float
   expect_true(abs(filter(res_df, dt=='2017-02-22', hr==5)$float_1 - (-8.41989)) <= 0.0001)
@@ -65,6 +70,10 @@ test_that("cass_save_df: updates work with proper type conversions and NA handli
 
   # test string escaping
   expect_equal(filter(res_df, dt=='2017-02-22', hr==5)$str_val,"Hi! It's hour 5")
+
+  # test boolean
+  expect_equal(filter(res_df, hr==1)$bool_val,T)
+  expect_equal(filter(res_df, hr==20)$bool_val,F)
 
   # test coersion of ints in numeric form to ints
   expect_equal(res_df$hr,seq(1,24))

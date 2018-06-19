@@ -22,7 +22,8 @@ public class CassandraColumn {
     CASS_TINYINT,
     CASS_LONG,
     CASS_DATE,
-    CASS_TIMESTAMP
+    CASS_TIMESTAMP,
+    CASS_BOOLEAN
   }
 
   String colName;
@@ -38,7 +39,7 @@ public class CassandraColumn {
   float[] floatData;
   int[] intData;
   long[] longData;
-  //boolean[] booleanData;
+  boolean[] booleanData;
 
   int dataCount;
 
@@ -108,6 +109,13 @@ public class CassandraColumn {
       this.getMethodJniType = "[J";
       this.rConversionName  = "as_posixct_from_1970_epoch_seconds";
 
+    } else if (this.colCassTypeStr.equals("boolean")) {
+      this.colCassType = CassType.CASS_BOOLEAN;
+      this.booleanData = new boolean[estimatedSize]; 
+      this.getMethodName    = "getBooleans";
+      this.getMethodJniType = "[Z";
+      this.rConversionName  = "as.logical";
+
     } else {
       System.err.println("ERROR:::: Unknown type: " + this.colName + " type " + this.colCassTypeStr);
       // TODO: raise exception
@@ -156,6 +164,10 @@ public class CassandraColumn {
         expandLongDataIfNeeded(this.dataCount);
         this.longData[this.dataCount-1] = row.getLong(this.cassColIdx);
         break;
+      case CASS_BOOLEAN:
+        expandBooleanDataIfNeeded(this.dataCount);
+        this.booleanData[this.dataCount-1] = row.getBool(this.cassColIdx);
+        break; 
       case CASS_TIMESTAMP :
         expandLongDataIfNeeded(this.dataCount);
         // handle null here to prevent null pointer exceptions in the math.  proper NAs will be handled by R
@@ -206,6 +218,14 @@ public class CassandraColumn {
     float[] retArr = new float[this.dataCount];
     System.arraycopy(this.floatData, 0, retArr, 0, this.dataCount);
     return(retArr);
+  }
+
+  public boolean[] getBooleans() {
+    if (this.dataCount == 0) { return(new boolean[0]); }
+    
+    boolean[] retArr = new boolean[this.dataCount];
+    System.arraycopy(this.booleanData, 0, retArr, 0, this.dataCount); 
+    return(retArr); 
   }
 
   public int[] getInts() {
@@ -292,6 +312,14 @@ public class CassandraColumn {
       System.arraycopy(this.longData, 0, newArr, 0, newDataCount-1);
       this.longData = null; // hint GC?
       this.longData = newArr;
+    }
+  }
+  private void expandBooleanDataIfNeeded(int newDataCount) {
+    if (this.booleanData.length <= newDataCount) {
+      boolean[] newArr = new boolean[this.expansionNewSize(newDataCount)];
+      System.arraycopy(this.booleanData, 0, newArr, 0, newDataCount-1);
+      this.booleanData = null; // hint GC?
+      this.booleanData = newArr;
     }
   }
 }
