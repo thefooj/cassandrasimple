@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Hashtable;
 import java.util.Date;
+import java.math.BigInteger;
 import com.tioscapital.cassandrasimple.CassandraColumn;
 
 
@@ -20,6 +21,8 @@ public class CassandraColumn {
     CASS_STRING,
     CASS_INT,
     CASS_TINYINT,
+    CASS_BIGINT,
+    CASS_VARINT,
     CASS_LONG,
     CASS_DATE,
     CASS_TIMESTAMP,
@@ -88,12 +91,19 @@ public class CassandraColumn {
       this.getMethodJniType = "[I";
       this.rConversionName  = "as.integer";
 
-    } else if (this.colCassTypeStr.equals("long")) {
+    } else if (this.colCassTypeStr.equals("long") || this.colCassTypeStr.equals("bigint")) {
       this.colCassType = CassType.CASS_LONG;
       this.longData = new long[estimatedSize];
       this.getMethodName    = "getLongs";
       this.getMethodJniType = "[J";
-      this.rConversionName  = "as.integer";
+      this.rConversionName  = "as.numeric";
+
+    } else if (this.colCassTypeStr.equals("varint")) {
+      this.colCassType = CassType.CASS_VARINT;
+      this.longData = new long[estimatedSize];
+      this.getMethodName    = "getLongs";
+      this.getMethodJniType = "[J";
+      this.rConversionName  = "as.numeric";
 
     } else if (this.colCassTypeStr.equals("date")) {
       this.colCassType = CassType.CASS_DATE;
@@ -159,6 +169,14 @@ public class CassandraColumn {
       case CASS_TINYINT :
         expandIntDataIfNeeded(this.dataCount);
         this.intData[this.dataCount-1] = (int)(row.getByte(this.cassColIdx));
+        break;
+      case CASS_VARINT:
+        expandLongDataIfNeeded(this.dataCount);
+        if (row.isNull(this.cassColIdx)) {
+          this.longData[this.dataCount-1] = 0L;
+        } else {
+          this.longData[this.dataCount-1] = row.getVarint(this.cassColIdx).longValue();
+        }
         break;
       case CASS_LONG :
         expandLongDataIfNeeded(this.dataCount);
